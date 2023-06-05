@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Link Viewer</title>
+    <style>
+        #loading {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        var loading = false;
+        var page = 1;
+        var perPage = 5;
+        var allLinks = {{ links | tojson }};
+
+        function loadMoreLinks() {
+            if (!loading) {
+                loading = true;
+                var links = allLinks.slice((page - 1) * perPage, page * perPage);
+                var container = $('#links');
+
+                $.each(links, function(index, link) {
+                    if (link.endsWith('.jpg') || link.endsWith('.jpeg') || link.endsWith('.png') || link.endsWith('.gif')) {
+                        container.append('<li><img src="' + link + '" alt="Image"></li>');
+                    } else if (link.endsWith('.mp4') || link.endsWith('.mov')) {
+                        container.append('<li><video width="320" height="240" controls><source src="' + link + '" type="video/mp4">Your browser does not support the video tag.</video></li>');
+                    } else {
+                        container.append('<li><a href="' + link + '">' + link + '</a></li>');
+                    }
+                });
+
+                page++;
+                loading = false;
+            }
+        }
+
+        $(window).scroll(function() {
+            if ($(window).scrollTop() + $(window).height() >= $(document).height()) {
+                loadMoreLinks();
+            }
+        });
+
+        $(document).ready(function() {
+            loadMoreLinks();
+        });
+    </script>
+</head>
+<body>
+    <h1>Memes</h1>
+
+    <h2>Add a link:</h2>
+
+    <form method="POST" action="/">
+        <input type="text" name="link" placeholder="Enter a link">
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Links:</h2>
+    <ul id="links"></ul>
+    <div id="loading">Loading...</div>
+</body>
+</html>
